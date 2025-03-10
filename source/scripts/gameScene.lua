@@ -4,16 +4,7 @@ import "./gameManager"
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 
-
 class('GameScene').extends(Room)
-
-local text = {
-    'You are humanity\'s last hope\nof stopping an alien invasion.\nYou are given two weapons.',
-    'The Reflect Gun shoots disks\nthat bounce off walls. Hit\nenemies around corners.',
-    'The Float Gun lobs explosive\ncharges over walls. Very\neffective, but be careful',
-    'You will always have another\nsoldier to take over, but the\nweapons will not refill.',
-    'Press Menu to view your controls.'
-}
 
 function GameScene:enter()
     -- GameManager is already initialized as a singleton

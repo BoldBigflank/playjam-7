@@ -36,10 +36,9 @@ function pd.update()
 end
 
 local function loadGame()
-    -- Font
-    local font = gfx.font.new('font/topaz_11')
+    -- Set font
+    gfx.setFont(gfx.font.new('font/topaz_11'))
     math.randomseed(playdate.getSecondsSinceEpoch())
-    gfx.setFont(font)
 
     SceneManager:enter(IntroScene, "Welcome to the game!")
     SceneManager:hook({})

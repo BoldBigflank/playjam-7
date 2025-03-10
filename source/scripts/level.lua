@@ -109,8 +109,8 @@ function Level:createSprite(x, y)
     sprite:addState("enemy", Level.SPRITE_INDICES[Level.POSITION_TYPES.ENEMY],
         Level.SPRITE_INDICES[Level.POSITION_TYPES.ENEMY] + 1, { tickStep = 5 })
 
-    sprite:setCenter(0, 0)
-    sprite:moveTo(self.x + (x - 1) * 16, self.y + (y - 1) * 16)
+    sprite:setCenter(0.5, 0.5)
+    sprite:moveTo(self.x + (x - 1) * 16 + 8, self.y + (y - 1) * 16 + 8)
     sprite:add()
 
     -- Change to the appropriate state based on grid type
@@ -258,8 +258,32 @@ function Level:movePlayer(direction)
     end
 
     if self:isBlank(newX, newY) then
+        -- Reset rotation of the tile the player is leaving
+        local oldSprite = self.sprites[playerY][playerX]
+        if oldSprite then
+            oldSprite:setRotation(0)
+        end
+
+        -- Update player position
         self:setPositionType(playerX, playerY, Level.POSITION_TYPES.BLANK)
         self:setPositionType(newX, newY, Level.POSITION_TYPES.PLAYER)
+
+        -- Update player sprite rotation based on direction
+        local playerSprite = self.sprites[newY][newX]
+        if playerSprite then
+            local rotation = 0
+            if direction == "UP" then
+                rotation = 0
+            elseif direction == "RIGHT" then
+                rotation = 90
+            elseif direction == "DOWN" then
+                rotation = 180
+            elseif direction == "LEFT" then
+                rotation = 270
+            end
+            playerSprite:setRotation(rotation)
+        end
+
         return true
     end
 
@@ -377,6 +401,7 @@ function Level:moveWalls(direction)
             local nextX = currentX + dir.x
             local nextY = currentY + dir.y
             if self:isPositionType(nextX, nextY, Level.POSITION_TYPES.WALL) or
+                self:isPositionType(nextX, nextY, Level.POSITION_TYPES.BLOCK) or
                 nextX < 1 or nextX > self.width or nextY < 1 or nextY > self.height then
                 firstBlankX, firstBlankY = currentX, currentY
                 break
