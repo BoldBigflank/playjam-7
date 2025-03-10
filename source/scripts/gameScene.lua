@@ -16,8 +16,6 @@ local text = {
 }
 
 function GameScene:enter()
-    print("GameScene:enter")
-
     -- GameManager is already initialized as a singleton
     GameManager:newGame()
 end

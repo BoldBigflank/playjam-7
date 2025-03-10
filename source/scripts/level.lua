@@ -89,7 +89,6 @@ function Level:init(width, height, wallPercent, blockPercent)
         if self.grid[randY][randX] == Level.POSITION_TYPES.BLANK then
             self.grid[randY][randX] = Level.POSITION_TYPES.PLAYER
             playerPlaced = true
-            print("Player placed at:", randX, randY)
         end
     end
     self:updateSprites()
@@ -131,7 +130,6 @@ function Level:createSprite(x, y)
 end
 
 function Level:updateSprites()
-    print("Updating sprites")
     for y = 1, self.height do
         for x = 1, self.width do
             local sprite = self.sprites[y][x]
@@ -374,13 +372,21 @@ function Level:moveWalls(direction)
             return false
         end
 
-        -- If we found a blank tile, that's our target
-        if self:isBlank(currentX, currentY) or
-            (self:isPositionType(currentX, currentY, Level.POSITION_TYPES.ENEMY) and
-                (currentX + dir.x < 1 or currentX + dir.x > self.width or
-                    currentY + dir.y < 1 or currentY + dir.y > self.height or
-                    self:isPositionType(currentX + dir.x, currentY + dir.y, Level.POSITION_TYPES.WALL) or
-                    self:isPositionType(currentX + dir.x, currentY + dir.y, Level.POSITION_TYPES.BLOCK))) then
+        -- If we hit an enemy, make sure there's a wall or edge of the level one tile after it
+        if self:isPositionType(currentX, currentY, Level.POSITION_TYPES.ENEMY) then
+            local nextX = currentX + dir.x
+            local nextY = currentY + dir.y
+            if self:isPositionType(nextX, nextY, Level.POSITION_TYPES.WALL) or
+                nextX < 1 or nextX > self.width or nextY < 1 or nextY > self.height then
+                firstBlankX, firstBlankY = currentX, currentY
+                break
+            else
+                return false
+            end
+        end
+
+        -- If we hit a blank tile, that's our target
+        if self:isBlank(currentX, currentY) then
             firstBlankX, firstBlankY = currentX, currentY
             break
         end

@@ -2,7 +2,6 @@ import "./gameScene"
 class('IntroScene').extends(Room)
 
 function IntroScene:enter(prev, text)
-    print("IntroScene:enter", text)
     self.text = text
     local titleSprite = Utils:textSprite(self.text)
     titleSprite:setCenter(0, 0)

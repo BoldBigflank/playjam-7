@@ -43,7 +43,6 @@ local function loadGame()
 
     SceneManager:enter(IntroScene, "Welcome to the game!")
     SceneManager:hook({})
-    print("loadGame")
 end
 
 loadGame()

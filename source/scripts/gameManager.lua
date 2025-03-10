@@ -3,7 +3,6 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 
 function GameManager:init()
-    print("GameManager:init")
     if not self.initialized then
         self.initialized = true
         self:reset()
@@ -11,7 +10,6 @@ function GameManager:init()
 end
 
 function GameManager:reset()
-    print("GameManager:reset called from:", debug.traceback())
     -- Clean up existing sprites
     gfx.sprite.removeAll()
     self.level = nil
@@ -27,7 +25,6 @@ function GameManager:newGame()
 end
 
 function GameManager:playerDied()
-    print("GameManager:playerDied")
     -- Find a random blank tile to respawn the player
     self.lives = self.lives - 1
     if self.lives == 0 then
@@ -56,7 +53,6 @@ function GameManager:allEnemiesDead()
 end
 
 function GameManager:tick()
-    print("GameManager:tick")
     self.level:moveEnemies()
 end
 
