@@ -38,6 +38,8 @@ function Level:init(width, height, wallPercent, blockPercent)
     self.grid = {}
     self.sprites = {}
     self.spritesheet = Utils:getSpritesheet()
+    self.playerX = nil
+    self.playerY = nil
 
     -- Ensure percentages are valid
     wallPercent = wallPercent or 0
@@ -88,6 +90,8 @@ function Level:init(width, height, wallPercent, blockPercent)
         -- Only place player on blank spaces
         if self.grid[randY][randX] == Level.POSITION_TYPES.BLANK then
             self.grid[randY][randX] = Level.POSITION_TYPES.PLAYER
+            self.playerX = randX
+            self.playerY = randY
             playerPlaced = true
         end
     end
@@ -134,19 +138,31 @@ function Level:updateSprites()
         for x = 1, self.width do
             local sprite = self.sprites[y][x]
             if sprite then
-                -- Change to the appropriate state based on grid type
-                local stateName = "blank"
+                -- Only update state if it's different from current
+                local currentState = sprite:getCurrentState()
+                local newState = "blank"
                 if self.grid[y][x] == Level.POSITION_TYPES.WALL then
-                    stateName = "wall"
+                    newState = "wall"
                 elseif self.grid[y][x] == Level.POSITION_TYPES.BLOCK then
-                    stateName = "block"
+                    newState = "block"
                 elseif self.grid[y][x] == Level.POSITION_TYPES.PLAYER then
-                    stateName = "player"
+                    newState = "player"
                 elseif self.grid[y][x] == Level.POSITION_TYPES.ENEMY then
-                    stateName = "enemy"
+                    newState = "enemy"
                 end
-                sprite:changeState(stateName, true)
-                sprite:moveTo(self.x + (x - 1) * 16, self.y + (y - 1) * 16)
+
+                if currentState ~= newState then
+                    sprite:changeState(newState, true)
+                end
+
+                -- Only update position if it's different from current
+                local currentX, currentY = sprite:getPosition()
+                local targetX = self.x + (x - 1) * 16 + 8
+                local targetY = self.y + (y - 1) * 16 + 8
+
+                if currentX ~= targetX or currentY ~= targetY then
+                    sprite:moveTo(targetX, targetY)
+                end
             end
         end
     end
@@ -181,6 +197,8 @@ function Level:setPositionType(x, y, type)
             stateName = "block"
         elseif type == Level.POSITION_TYPES.PLAYER then
             stateName = "player"
+            self.playerX = x
+            self.playerY = y
         elseif type == Level.POSITION_TYPES.ENEMY then
             stateName = "enemy"
         end
@@ -233,14 +251,7 @@ function Level:isBlank(x, y)
 end
 
 function Level:getPlayerPosition()
-    for y = 1, self.height do
-        for x = 1, self.width do
-            if self:isPositionType(x, y, Level.POSITION_TYPES.PLAYER) then
-                return x, y
-            end
-        end
-    end
-    return nil
+    return self.playerX, self.playerY
 end
 
 function Level:movePlayer(direction)
@@ -292,28 +303,42 @@ end
 
 function Level:moveEnemies()
     local enemyPositions = {}
+    local playerX, playerY = self:getPlayerPosition()
+    local enemyCount = 0
+
+    -- Collect enemy positions and count them
     for y = 1, self.height do
         for x = 1, self.width do
             if self:isPositionType(x, y, Level.POSITION_TYPES.ENEMY) then
+                enemyCount = enemyCount + 1
                 table.insert(enemyPositions, { x = x, y = y })
             end
         end
     end
 
-    if #enemyPositions == 0 then
+    if enemyCount == 0 then
         GameManager:allEnemiesDead()
         return
     end
 
-    local playerX, playerY = self:getPlayerPosition()
+    -- Helper function to calculate Manhattan distance
+    local function getDistance(x1, y1, x2, y2)
+        return math.abs(x1 - x2) + math.abs(y1 - y2)
+    end
+
+    -- Helper function to check if a position is valid and movable
+    local function isValidMove(x, y)
+        return x >= 1 and x <= self.width and
+            y >= 1 and y <= self.height and
+            (self:isBlank(x, y) or self:isPositionType(x, y, Level.POSITION_TYPES.PLAYER))
+    end
 
     for _, enemyPos in ipairs(enemyPositions) do
         local x, y = enemyPos.x, enemyPos.y
-        -- Calculate Manhattan distance to player
-        local distance = math.abs(x - playerX) + math.abs(y - playerY)
+        local distance = getDistance(x, y, playerX, playerY)
 
         if distance <= 6 then
-            -- Check all adjacent tiles
+            -- Chase player
             local bestMove = nil
             local bestDistance = 100 * distance
 
@@ -321,14 +346,8 @@ function Level:moveEnemies()
                 local newX = x + offset.x
                 local newY = y + offset.y
 
-                -- Check if position is valid and blank
-                if newX >= 1 and newX <= self.width and
-                    newY >= 1 and newY <= self.height and
-                    self:isBlank(newX, newY) or self:isPositionType(newX, newY, Level.POSITION_TYPES.PLAYER) then
-                    -- Calculate new distance to player
-                    local newDistance = math.abs(newX - playerX) + math.abs(newY - playerY)
-
-                    -- Move if this gets us closer to the player
+                if isValidMove(newX, newY) then
+                    local newDistance = getDistance(newX, newY, playerX, playerY)
                     if newDistance < bestDistance then
                         bestMove = { x = newX, y = newY }
                         bestDistance = newDistance
@@ -336,26 +355,20 @@ function Level:moveEnemies()
                 end
             end
 
-            -- Make the move if we found a better position
             if bestMove then
-                -- Check if we would reach the player
-                if math.abs(bestMove.x - playerX) + math.abs(bestMove.y - playerY) == 0 then
+                if getDistance(bestMove.x, bestMove.y, playerX, playerY) == 0 then
                     GameManager:playerDied()
                 end
-
                 self:setPositionType(x, y, Level.POSITION_TYPES.BLANK)
                 self:setPositionType(bestMove.x, bestMove.y, Level.POSITION_TYPES.ENEMY)
             end
         else
-            -- Move to a random adjacent blank tile
+            -- Random movement
             local validMoves = {}
             for direction, offset in pairs(Level.DIRECTIONS) do
                 local newX = x + offset.x
                 local newY = y + offset.y
-
-                if newX >= 1 and newX <= self.width and
-                    newY >= 1 and newY <= self.height and
-                    self:isBlank(newX, newY) then
+                if isValidMove(newX, newY) then
                     table.insert(validMoves, { x = newX, y = newY })
                 end
             end
