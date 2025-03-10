@@ -28,8 +28,6 @@ local gfx <const> = playdate.graphics
 SceneManager = Manager()
 
 function pd.update()
-    gfx.drawTextAligned("Template configured!", 200, 30, kTextAlignment.center)
-
     pd.timer.updateTimers()
     gfx.sprite.update()
     SceneManager:emit("update")

@@ -103,13 +103,13 @@ function Level:createSprite(x, y)
 
     -- Add states for each position type
     sprite:addState("blank", Level.SPRITE_INDICES[Level.POSITION_TYPES.BLANK],
-        Level.SPRITE_INDICES[Level.POSITION_TYPES.BLANK], { tickStep = 1 })
+        Level.SPRITE_INDICES[Level.POSITION_TYPES.BLANK], {})
     sprite:addState("wall", Level.SPRITE_INDICES[Level.POSITION_TYPES.WALL],
-        Level.SPRITE_INDICES[Level.POSITION_TYPES.WALL], { tickStep = 1 })
+        Level.SPRITE_INDICES[Level.POSITION_TYPES.WALL], {})
     sprite:addState("block", Level.SPRITE_INDICES[Level.POSITION_TYPES.BLOCK],
-        Level.SPRITE_INDICES[Level.POSITION_TYPES.BLOCK], { tickStep = 1 })
+        Level.SPRITE_INDICES[Level.POSITION_TYPES.BLOCK], {})
     sprite:addState("player", Level.SPRITE_INDICES[Level.POSITION_TYPES.PLAYER],
-        Level.SPRITE_INDICES[Level.POSITION_TYPES.PLAYER], { tickStep = 1 })
+        Level.SPRITE_INDICES[Level.POSITION_TYPES.PLAYER], {})
     sprite:addState("enemy", Level.SPRITE_INDICES[Level.POSITION_TYPES.ENEMY],
         Level.SPRITE_INDICES[Level.POSITION_TYPES.ENEMY] + 1, { tickStep = 5 })
 
