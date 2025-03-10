@@ -278,6 +278,11 @@ function Level:moveEnemies()
         end
     end
 
+    if #enemyPositions == 0 then
+        GameManager:allEnemiesDead()
+        return
+    end
+
     local playerX, playerY = self:getPlayerPosition()
 
     for _, enemyPos in ipairs(enemyPositions) do

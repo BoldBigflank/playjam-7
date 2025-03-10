@@ -1,3 +1,5 @@
+import "./gameScene"
+import "./gameManager"
 -- shorthand variables
 local pd <const> = playdate
 local gfx <const> = pd.graphics
@@ -15,31 +17,9 @@ local text = {
 
 function GameScene:enter()
     print("GameScene:enter")
-    -- local titleSprite = Utils:textSprite(text[2])
-    -- titleSprite:setCenter(0, 0)
-    -- titleSprite:moveTo(128, 64)
-    -- titleSprite:add()
 
-    -- local titleSprite = Utils:textSprite(text[3])
-    -- titleSprite:setCenter(0, 0)
-    -- titleSprite:moveTo(80, 112)
-    -- titleSprite:add()
-
-    -- local titleSprite = Utils:textSprite(text[4])
-    -- titleSprite:setCenter(0, 0)
-    -- titleSprite:moveTo(128, 160)
-    -- titleSprite:add()
-
-    -- local titleSprite = Utils:textSprite(text[5])
-    -- titleSprite:setCenter(0.5, 0)
-    -- titleSprite:moveTo(200, 208)
-    -- titleSprite:add()
-
-    -- local aButtonSprite = AnimatedSprite(Utils:getSpritesheet())
-    -- aButtonSprite:addState("idle", 1, 1,
-    --     { xScale = 2, yScale = 2, frames = { SPRITES.AButton, SPRITES.Empty }, tickStep = 6 })
-    -- aButtonSprite:changeState('idle', true)
-    -- aButtonSprite:moveTo(400 - 32, 240 - 32)
+    -- GameManager is already initialized as a singleton
+    GameManager:newGame()
 end
 
 function GameScene:update()
@@ -63,17 +43,4 @@ function GameScene:update()
         GameManager:tick()
         self.lastTickTime = currentTime
     end
-
-    -- GameManager:tick()
-end
-
-function GameScene:AButtonDown()
-    self.canAdvance = true
-end
-
-function GameScene:AButtonUp()
-    print("GameScene:AButtonUp")
-    if not self.canAdvance then return end
-    -- SoundPlayer:playSound(SOUNDS.Shoot)
-    -- SceneManager:enter(MissionBriefingScene)
 end

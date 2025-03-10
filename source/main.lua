@@ -19,8 +19,7 @@ import "libraries/PDOptions"
 import "scripts/constants"
 import "scripts/utils"
 import "scripts/level"
-import "scripts/gameManager"
-import "scripts/gameScene"
+import "scripts/introScene"
 
 -- Localizing commonly used globals
 local pd <const> = playdate
@@ -42,10 +41,7 @@ local function loadGame()
     math.randomseed(playdate.getSecondsSinceEpoch())
     gfx.setFont(font)
 
-    -- GameManager is already initialized as a singleton
-    GameManager:reset()
-
-    SceneManager:enter(GameScene)
+    SceneManager:enter(IntroScene, "Welcome to the game!")
     SceneManager:hook({})
     print("loadGame")
 end

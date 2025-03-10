@@ -14,11 +14,16 @@ function GameManager:reset()
     print("GameManager:reset called from:", debug.traceback())
     -- Clean up existing sprites
     gfx.sprite.removeAll()
+    self.level = nil
+end
+
+function GameManager:newGame()
+    self:reset()
 
     self.health = 100
     self.lives = 3
     self.levelIndex = 1
-    self.level = Level(20, 12, 40, 10)
+    self.level = Level(20, 12, 40, 5)
 end
 
 function GameManager:playerDied()
@@ -27,6 +32,7 @@ function GameManager:playerDied()
     self.lives = self.lives - 1
     if self.lives == 0 then
         self:reset()
+        SceneManager:enter(IntroScene, "You Lose!")
         return
     end
     local playerPlaced = false
@@ -42,6 +48,11 @@ function GameManager:playerDied()
             playerPlaced = true
         end
     end
+end
+
+function GameManager:allEnemiesDead()
+    self:reset()
+    SceneManager:enter(IntroScene, "You Win!")
 end
 
 function GameManager:tick()
